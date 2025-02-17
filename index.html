@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار التحصيلي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #2A2760;
+            --secondary: #4F46E5;
+            --accent: #818CF8;
+            --dark: #0F172A;
+            --text: #F8FAFC;
+            --success: #34D399;
+            --error: #F87171;
+            --surface: #1E293B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+            padding: 4rem 1rem;
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .units {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .unit {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            border: 1px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .unit:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .unit i {
+            font-size: 2rem;
+            margin-left: 0.5rem;
+            color: var(--accent);
+        }
+
+        .question-container {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-top: 2rem;
+            display: none;
+            position: relative;
+            border: 1px solid var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            background: var(--primary);
+            border: none;
+            color: var(--text);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--secondary);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            transition: width 0.3s ease;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option {
+            background: var(--primary);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .option:hover {
+            background: var(--secondary);
+        }
+
+        .explanation {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            border-right: 3px solid var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>اختبار التحصيلي</h1>
+        <p>تم إعداد الأسئلة بعناية لتغطية كافة جوانب المنهج الدراسي</p>
+    </div>
+    
+    <div class="container">
+        <div class="units" id="units"></div>
+        <div class="question-container" id="questionContainer">
+            <div class="progress-bar" id="progressBar"></div>
+            <div class="question-header">
+                <button class="back-btn" onclick="showUnits()">
+                    <i class="fas fa-arrow-left"></i>
+                    العودة
+                </button>
+            </div>
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+  "units": [
+    {
+      "id": 1739819336667,
+      "name": "حالات المادة",
+      "description": "تفسر نظرية الحركة الجزيئية الخصائص المختلفة للمواد الصلبة والسائلة والغازية",
+      "questions": [
+        {
+          "text": "النموذج الذي يصف سلوك الغازات بالاعتماد على حركة جسيماتها يدعى:",
+          "options": [
+            "نظرية الحركة الجزيئية",
+            "نظرية دالتون الذرية",
+            "نظرية وحدانية المادة",
+            "نظرية رابطة التكافؤ"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "إذا عصرت وسادة البولسترين بالضغط عليها يقل حجمها ألن المسافة بين الجزيئات: ",
+          "options": [
+            "كبيرة جدًا",
+            "صغيرة جدًا",
+            "متوسطة",
+            "صغيرة"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "تنعدم قوى التجاذب بين الجسيمات الغازية لأن:",
+          "options": [
+            "حجومها كبيرة جدًا",
+            "جزيئاتها متقاربة جدًا",
+            "حجومها صغيرة جدًا ومتباعدة",
+            "حجومها صغيرة جدًا ومتقاربة"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "تستطيع أن تشم رائحة الطعام عند طهيه في أرجاء المنزل لأن:",
+          "options": [
+            "الغاز سريع الانتشار",
+            "الغاز قابل للانضغاط",
+            "الغاز عديم الرائحة",
+            "الغاز عديم اللون"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "خروج الغاز من خالل ثقب صغير يسمى",
+          "options": [
+            "انضغاط",
+            "انتشار",
+            "تدفق",
+            "تمدد"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "معدل سرعة تدفق الغاز يتناسب تناسبا عكسيا مع الجذر التربيعي للكتلة المولية",
+          "options": [
+            "قانون دالتون",
+            "قانون جراهام",
+            "قانون بويل",
+            "قانون شارل"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "إذا كانت الكتلة المولية لألمونيا mol/g17 ، ولكلوريد الهيدروجين mol/g 36.5 فإن نسبة معدل االنتشار تساوي : ",
+          "options": [
+            "1.77",
+            "1.74",
+            "1.47",
+            "4.17"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "القوة الواقعة على وحدة المساحة تسمى",
+          "options": [
+            "الضغط الجوي",
+            "الضغط",
+            "الضغط الجزئي",
+            "الضغط الكلي"
+          ],
+          "correct": 3
+        },
+        {
+          "text": "وزن عمود من الزئبق طوله 76cm",
+          "options": [
+            "الضغط الجوي",
+            "الضغط",
+            "الضغط الجزئي",
+            "الضغط الكلي"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "البارومتر جهاز لقياس",
+          "options": [
+            "ضغط الأكسجين",
+            "الضغط الجوي",
+            "ضغط الغاز المحصور",
+            "ضغط بخار الماء"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "المانومتر أداة لقياس",
+          "options": [
+            "ضغط الغاز المحصور",
+            "ضغط الغلاف الجوي",
+            "الضغط الجوي",
+            "ضغط الهواء الجوي"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "الباسكال Pa وحدة قياس",
+          "options": [
+            "الحجم",
+            "السعة",
+            "الضغط",
+            "المساحة"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "جميع الوحدات التالية وحدات قياس الضغط عدا",
+          "options": [
+            "atm",
+            "mmHg",
+            "CmHg",
+            "Cm"
+          ],
+          "correct": 3
+        },
+        {
+          "text": " atm 1 يساوي",
+          "options": [
+            "76 torr",
+            "760 torr",
+            "76 mmHg",
+            "101.3 Pa"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "الضغط الكلي لخليط من الغازات يساوي مجموع الضغوط الجزئية للغازات المكونة له",
+          "options": [
+            "قانون بويل",
+            "قانون شارل",
+            "قانون جاي لوساك",
+            "قانون دالتون"
+          ],
+          "correct": 3
+        },
+        {
+          "text": "الضغط الكلي لخليط من الغازات atm 0.97 إذا علمت أن ضغط O2 يساوي atm 0.30 ، وضغط H2 يساوي atm 0.35 فإن ضغط N2: ",
+          "options": [
+            "0.32 atm",
+            "0.30 atm",
+            "0.29 atm",
+            "0.67 atm"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "تسمى قوة الترابط بين جزيئات األكسجين O2",
+          "options": [
+            "قوى التشتت",
+            "ترابط هيدروجيني",
+            "قوى ثنائية القطب",
+            "روابط أيونية"
+          ],
+          "correct": 0
+        },
+        {
+          "text": " إحدى المواد التالية قوى التشتت بين جزيئاتها عالي",
+          "options": [
+            "الفلور",
+            "اليود",
+            "الكلور",
+            "البروم"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "أي من المواد التالية ينشأ بين جزيئاتها قوى ثنائية القطب",
+          "options": [
+            "Cl2",
+            "N2",
+            "CH4",
+            "HF"
+          ],
+          "correct": 3
+        },
+        {
+          "text": "المادة التي ال تتكون بين جزيئاتها روابط هيدروجينية فيما يلي هي",
+          "options": [
+            "H2O",
+            "CH3NH2",
+            "C2H6",
+            "NH3"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "إذا كانت الضغوط الجزئية لخليط من الغازات كالتالي: (PO2 = 0.5atm, PN2= 0.5atm, PCO2= 0.25atm) فإن الضغط الكلي للخليط Ptotal يساوي",
+          "options": [
+            "1 atm",
+            "1.5 atm",
+            "1.25 atm",
+            "2.5 atm"
+          ],
+          "correct": 2
+        },
+        {
+          "text": " قابلية المادة للانسياب والانتشار تسمى",
+          "options": [
+            "لزوجة",
+            "توتر سطحي",
+            "ميوعة",
+            "لزوجة فائقة"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "مقياس مقاومة السائل للتدفق والانسياب يسمى",
+          "options": [
+            "لزوجة",
+            "ميوعة",
+            "توتر سطحي",
+            "ميوعة فائقة"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "كلما كانت القوى بين جزيئات السائل كبيرة زادت درجة",
+          "options": [
+            "انتشاره",
+            "لزوجته",
+            "ميوعته",
+            "انسيابه"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "تقل لزوجة السائل عند",
+          "options": [
+            "ارتفاع درجة الحرارة",
+            "انخفاض درجة الحرارة",
+            "زيادة كتلته",
+            "زيادة قوى التجاذب بين جزيئاته"
+          ],
+          "correct": 0
+        },
+        {
+          "text": " يستطيع العنكبوت السير والوقوف على سطح ماء البركة لأن",
+          "options": [
+            "التوتر السطحي للماء عالي",
+            "لزوجة الماء عالية",
+            "ميوعة الماء عالية",
+            "انسياب الماء عاليًا"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "لا يمكن للماء انتزاع الأوساخ من الملابس بمفرده لأن",
+          "options": [
+            "لزوجته عالية",
+            "توتره السطحي عالي",
+            "توتره السطحي منخفض",
+            "قوى التماسك بين جزئياته ضعيفة"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "قوة الترابط بين الجسيمات المتماثلة يدعى",
+          "options": [
+            "تماسك",
+            "تلاصق",
+            "تماسك وتلاصق",
+            "تنافر"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "قوة الترابط بين الجزيئات المختلفة يسمى",
+          "options": [
+            "تماسك",
+            "تلاصق",
+            "تماسك وتلاصق",
+            "تنافر"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "يرتفع الماء على طول الجدران الداخلية للأنابيب الأسطوانية بسبب",
+          "options": [
+            "خاصية اللزوجة",
+            "خاصة التماسك والتلاصق",
+            "خاصية الانسياب",
+            "خاصية الميوعة"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "يسمى إرتفاع الماء في الأنابيب الأسطوانية الرفيعة جدا",
+          "options": [
+            "الخاصية الأسموزية",
+            "الخاصية الشعرية",
+            "خاصية اللزوجة",
+            "خاصية الميوعة"
+          ],
+          "correct": 1
+        },
+        {
+          "text": " تسمى المادة التي تكون ذراتها أو أيوناتها أو جزيئاتها مرتبة في شكل هندسي منتظم",
+          "options": [
+            "المادة الصلبة غير المتبلورة",
+            "المادة الصلبة البلورية",
+            "المادة السائلة",
+            "المادة الغازية"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "المواد التي لا تترتب فيها الجسيمات بنمط مكرر ومنتظم تسمى",
+          "options": [
+            "المواد الصلبة البلورية",
+            "المواد الصلبة غير المتبلورة",
+            "المواد الصلبة الأيونية",
+            "المواد الصلبة التساهمية الشبكية"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "يصنف الزجاج البركاني على أنه",
+          "options": [
+            "مادة صلبة متبلورة",
+            "مادة صلبة غير متبلورة",
+            "مادة صلبة بلورية أيونية",
+            "مادة صلبة بلورية فلزية"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "درجة الحرارة التي تتكسر عندها القوى التي تربط جسيمات الشبكة البلورية بعضها ببعض فتتحول المادة إلى الحالة السائلة تسمى",
+          "options": [
+            "درجة التجمد",
+            "درجة الانصهار",
+            "درجة الغليان",
+            "درجة التبخر"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "عندما يحدث التبخر عند سطح السائل فقط تعرف هذه العملية",
+          "options": [
+            "بالتبخر",
+            "بالتبخر السطحي",
+            "بالتسامي",
+            "بالتبخر المولاري"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "عندما يتجمع بخار الماء فوق سطح السائل ويولد ضغطا على سطحه يسمى ذلك",
+          "options": [
+            "التبخر السطحي",
+            "التبخر المولاري",
+            "التبخر",
+            "ضغط البخار"
+          ],
+          "correct": 3
+        },
+        {
+          "text": "تسمى درجة الحرارة التي يتساوى عندها ضغط بخار السائل مع الضغط الخارجي أو الضغط الجوي",
+          "options": [
+            "درجة التجمد",
+            "درجة الانصهار",
+            "درجة الغليان",
+            "درجة الانصهار المولارية"
+          ],
+          "correct": 2
+        },
+        {
+          "text": " تحول المادة مباشرة من الحالة الصلبة إلى الحالة الغازية يدعى",
+          "options": [
+            "تبخر",
+            "تسامي",
+            "انصهار",
+            "تجمد"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "درجة الحرارة التي يتحول عندها السائل إلى صلب بلوري تسمى",
+          "options": [
+            "درجة الانصهار",
+            "درجة التجمد",
+            "درجة الغليان",
+            "درجة التبخر المولاري"
+          ],
+          "correct": 1
+        },
+        {
+          "text": " تحول البخار إلى سائل يسمى",
+          "options": [
+            "تبخر",
+            "تكاثف",
+            "تجمد",
+            "تسامي"
+          ],
+          "correct": 1
+        },
+        {
+          "text": " تحول المادة من الحالة الغازية إلى الحالة الصلبة دون المرور بحالة السيولة يسمى",
+          "options": [
+            "تكاثف",
+            "تجمد",
+            "تسامي",
+            "ترسب"
+          ],
+          "correct": 3
+        },
+        {
+          "text": " الألماس أحد األشكال التآصلية لعنصر",
+          "options": [
+            "النيكل",
+            "الكربون",
+            "النحاس",
+            "الفضة"
+          ],
+          "correct": 1
+        }
+      ]
+    },
+    {
+      "id": 1739819362523,
+      "name": "الطاقة والتغيرات الكيميائية",
+      "description": "تمتص التفاعلات الكيميائية الحرارة أو تطلقها عادة",
+      "questions": [
+        {
+          "text": " علم يعتني بدراسة تغيرات الحرارة التي ترافق التفاعلات الكيميائية وتغيرات الحالة الفيزيائية",
+          "options": [
+            "الكيمياء العضوية",
+            "الكيمياء غير العضوية",
+            "الكيمياء الحرارية",
+            "الكيمياء التحليلية"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "القدرة على القيام بنشاط ما أو إنتاج حرارة يدعى",
+          "options": [
+            "الضغط",
+            "الطاقة",
+            "القوة",
+            "التوتر السطحي"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "تحول طاقة الوضع المخزونة في روابط جزيئات البيوتان إلى حرارة مثال على",
+          "options": [
+            "قانون الديناميكا الثاني",
+            "قانون بقاء الطاقة",
+            "قانون حفظ الكتلة",
+            "قانون بقاء الكتلة"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "تسمى الطاقة المخزنة في روابط جزيئات المادة",
+          "options": [
+            "الطاقة الحركية",
+            "الطاقة الميكانيكية",
+            "طاقة الوضع الكيميائية",
+            "الطاقة الحرارية"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "لرفع درجة حرارة جرام واحد من الماء النقي درجة سليزية واحدة نحتاج إلى طاقة حرارية تساوي ",
+          "options": [
+            "1cal",
+            "2cal",
+            "1J",
+            "2J"
+          ],
+          "correct": 0
+        },
+        {
+          "text": " الجول الواحد يعادل",
+          "options": [
+            " 0.2390cal",
+            "4.184cal",
+            "2.390cal",
+            "23.90cal"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "تحتوي مادة عذائية على Cal 140 غذائي ما مقدار هذه الطاقة بوحدة cal",
+          "options": [
+            "1400cal",
+            "14cal",
+            "14000cal",
+            "140000cal"
+          ],
+          "correct": 3
+        },
+        {
+          "text": "يطلق تفاعل طاقة حرارية مقدرارها kJ80 عبر عن هذه الكمية من الحرارة بوحدة kcal ",
+          "options": [
+            "19.12kcal",
+            "12.94kcal",
+            "1912kcal",
+            "1294kcal"
+          ],
+          "correct": 0
+        },
+        {
+          "text": " الحرارة النوعية للإيثانول°c.g/J 2.44 ما كمية الحرارة الالزمة لرفع درجة حرارة 1g منه؟",
+          "options": [
+            "1.22J",
+            "2.44J",
+            "4.88J",
+            "7.32J"
+          ],
+          "correct": 1
+        },
+        {
+          "text": " إذا تغيرت درجة حرارة عينة من الحديد كتلتها 10g من °50.4 إلى °25 وانطلقت كمية من الحرارة مقدارها 114J ما مقدار الحرارة النوعية للحديد ",
+          "options": [
+            "0.235 J/g. c° ",
+            "0.449 J/g. c° ",
+            "0.204 J/g. c°",
+            "0.647J/g. c° "
+          ],
+          "correct": 1
+        },
+        {
+          "text": "جهاز معزول حراريًا يستخدم لقياس كمية الحرارة الممتصة أو المنطلقة في التفاعل",
+          "options": [
+            "البارومتر",
+            "المانومتر",
+            "المسعر",
+            "الهيجروميتر"
+          ],
+          "correct": 2
+        },
+        {
+          "text": " أحد تغيرات الحالة الفيزيائية التالية طارد للحرارة",
+          "options": [
+            "الانصهار",
+            "التسامي",
+            "التبخر",
+            "الترسيب"
+          ],
+          "correct": 3
+        },
+        {
+          "text": " إذا كان المحتوى الحراري للنواتج أكبر من المحتوى الحراري للمتفاعلات يكون التفاعل",
+          "options": [
+            "طارد للحرارة",
+            "ماص للحرارة",
+            "طارد وماص",
+            "لا طارد ولا ماص"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "إذا كان التفاعل طاردًا للحرارة تكون إشارة ΔH",
+          "options": [
+            "سالبة",
+            "موجبة",
+            "سالبة وموجبة",
+            "لا سالبة ولا موجبة"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "المعادلة الكيميائية التي تعبر عن مقدار الحرارة المفقودة أو المكتسبة في التفاعل الكيميائي تسمى",
+          "options": [
+            "المعادلة الكيميائية اللفظية",
+            "المعادلة الكيميائية الأيونية",
+            "المعادلة الكيميائية الحرارية",
+            "المعادلة الكيميائية النووية"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "تفاعل فيه الطاقة في النواتج، هذا التفاعل:",
+          "options": [
+            "ماص للحرارة",
+            "طارد للحرارة",
+            "لا طارد ولا ماص",
+            "طارد وماص"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "الرمز ΔHvap يعبر عن",
+          "options": [
+            "حرارة التبخر المولارية",
+            "الحرارة الانصهار المولارية",
+            "حرارة التجمد المولارية",
+            "حرارة التكثف المولارية"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "ما كمية الحرارة الالزمة لصهر g25.7 من الميثانول الصلب علما أن ΔHfus = 3.22kJ/mol للميثانول الصلب، والكتل المولية (C =12, O=16, H=1):",
+          "options": [
+            "0.803kJ",
+            "2.586kJ",
+            "25.86kJ",
+            "0.2586kJ"
+          ],
+          "correct": 1
+        },
+        {
+          "text": " الشكل التالي يمثل تفاعل كيميائي حراري (المواد الناتجة طاقتها أعلى من المواد المتفاعلة)",
+          "options": [
+            "طارد للحرارة",
+            "ماص للحرارة",
+            "طارد وماص",
+            "لا طارد ولا ماص"
+          ],
+          "correct": 1
+        }
+      ]
+    },
+    {
+      "id": 1739819406931,
+      "name": "سرعة التفاعلات الكيميائية",
+      "description": "لكل تفاعل كيميائي سرعة محددة يمكن زيادتها أو إبطاؤها بتغيير ظروف التفاعل",
+      "questions": [
+        {
+          "text": "إحدى العبارات التالية خاطئة حول سرعة التفاعل الكيميائي",
+          "options": [
+            "السرعة التي يحدث بها التفاعل",
+            "التغير في تراكيز المواد الناتجة في وحدة الزمن",
+            "التغير في تراكيز المواد المتفاعلة في وحدة الزمن",
+            "كمية المواد الناتجة المتكونة في كل فترة زمنية"
+          ],
+          "correct": 3
+        },
+        {
+          "text": "يعبرعن التغير في التركيز الموالري للمواد المتفاعلة أو الناتجة في وحدة الزمن",
+          "options": [
+            "L/s",
+            "g/s",
+            "mol/l.s",
+            "L/min"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "يعبر عن سرعة التفاعل الكيميائي",
+          "options": [
+            "بسرعة استهلاك المواد المتفاعلة",
+            "بسرعة استهلاك المواد الناتجة",
+            "بسرعة اختفاء المواد الناتجة",
+            "بسرعة تكوين المواد المتفاعلة"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "التصادم شرط أساسي لحدوث التفاعل ...هذا أحد فروض نظرية",
+          "options": [
+            "الحركة الجزيئية",
+            "الحالة الانتقالية",
+            "التصادم",
+            "رابطة التكافؤ"
+          ],
+          "correct": 2
+        },
+        {
+          "text": " الحد الأدنى من الطاقة اللازمة لحدوث التفاعل يدعى",
+          "options": [
+            "الطاقة المنشطة",
+            "الطاقة الحركية",
+            "الطاقة الميكانيكية",
+            "الطاقة الوضعية"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "جميع العبارات التالية صائبة حول المعقد المنشط عدا",
+          "options": [
+            "مركب لحظي التكوين",
+            "معقد منشط غير ثابت",
+            "مركب انتقالي غير مستقر",
+            "طاقته أقل من طاقة المواد المتفاعلة"
+          ],
+          "correct": 3
+        },
+        {
+          "text": " إحدى العبارات التالية خاطئة فيما يخص فروض نظرية التصادم ",
+          "options": [
+            "يجب أن تتصادم جسيمات المواد المتفاعلة",
+            "ليس بالضرورة أن تتصادم جسيمات المواد المتفاعلة",
+            "لابد أن تتخذ جسيمات المواد المتفاعلة الاتجاه المناسب",
+            "لابد أن يكون لدى الجسيمات المتصادمة الطاقة الكافية لحدوث التفاعل"
+          ],
+          "correct": 1
+        },
+        {
+          "text": "تفاعل 1g من الخارصين مع 1M من نترات الفضة أسرع من تفاعل 1g من النحاس مع نفس الكمية من نت رات الفضة يعزى ذلك إلى عامل",
+          "options": [
+            "التركيز",
+            "طبيعة المواد المتفاعلة",
+            "مساحة السطح",
+            "الحرارة"
+          ],
+          "correct": 1
+        },
+        {
+          "text": " أي التفاعالت التالية أسرع؟",
+          "options": [
+            "0.1 M HCL مع 1g Mg",
+            "3 M HCL مع 1g Mg",
+            "2 M HCL مع 1g Mg",
+            "6 M HCL مع 1g Mg"
+          ],
+          "correct": 3
+        },
+        {
+          "text": "تشتعل نشارة الخشب في الهواء الجوي بمعدل أسرع من اشتعال كمية مماثلة من لوح خشبي",
+          "options": [
+            "لأن مساحة سطح تلامس النشارة مع الهواء أكبر",
+            "لأن تركيز الهواء الجوي عالي",
+            "لأن درجة الحرارة عالية",
+            "لأن تفاعل النشارة مع الأكسجين محفز"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "يعبر عن العلاقة الرياضية بين سرعة التفاعل وتركيز المواد المتفاعلة بالقانون ",
+          "options": [
+            "R = k[A]^m [B]^n",
+            "Kc = [A]^a [B]^b",
+            "Kw = [H+][OH-]",
+            "Keq = [A]^a [B]^b"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "R= k[A] يسمى k في هذه المعادلة",
+          "options": [
+            "ثابت الاتزان",
+            "ثابت حاصل الذوبانية",
+            "ثابت سرعة التفاعل",
+            "ثابت تأين الماء"
+          ],
+          "correct": 2
+        }
+      ]
+    },
+    {
+      "id": 1739819446947,
+      "name": "الاتزان الكيميائي",
+      "description": "يصل الكثير من التفاعلات إلى حالة من الاتزان الكيميائي، حيث تتكون كل من المواد المتفاعلة والناتجة بسرعات متساوية",
+      "questions": [
+        {
+          "text": "التفاعلات التي يحدث فيها استهلاك تام تقريبًا للمواد المتفاعلة تسمى",
+          "options": [
+            "التفاعلات العكسية",
+            "التفاعلات غير التامة",
+            "التفاعلات غير العكسية",
+            "التفاعلات المتزنة"
+          ],
+          "correct": 2
+        },
+        {
+          "text": "التفاعلات التي يحدث فيها استهلاك جزئي للمواد المتفاعلة تسمى",
+          "options": [
+            "التفاعلات العكسية",
+            "التفاعلات التامة",
+            "التفاعلات غير العكسية",
+            "التفاعلات غير المتزنة"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "جميع العالمات التالية ترمز لتفاعل كيميائي في حالة اتزان عدا",
+          "options": [
+            "⇌",
+            "→",
+            "⇆",
+            "="
+          ],
+          "correct": 1
+        },
+        {
+          "text": "تقل ذوبانية كرومات الرصاص كلما زاد تركيز محلول كرومات البوتاسيوم الذائبة في المحلول..يسمى هذا تأثير",
+          "options": [
+            "الأيون المشترك",
+            "الأيون الموجب",
+            "الأيون السالب",
+            "الأيون المتفرج"
+          ],
+          "correct": 0
+        },
+        {
+          "text": " تتغير قيمة ثابت االتزان لتفاعل ما بتغير",
+          "options": [
+            "التركيز",
+            "الضغط",
+            "الحافز",
+            "درجة الحرارة"
+          ],
+          "correct": 3
+        },
+        {
+          "text": " ليس من خواص النظام المتزن",
+          "options": [
+            "الطبيعة الديناميكية",
+            "ثبوت درجة الحرارة",
+            "النظام المتزن مغلق",
+            "تغير درجة الحرارة"
+          ],
+          "correct": 3
+        }
+      ]
+    }
+  ]
+};
+
+        let currentUnit = null;
+        let currentQuestionIndex = 0;
+
+        function initializeUnits() {
+            const unitsContainer = document.getElementById('units');
+            unitsContainer.innerHTML = '';
+            
+            quizData.units.forEach(unit => {
+                const unitElement = document.createElement('div');
+                unitElement.className = 'unit';
+                unitElement.innerHTML = `
+                    <i class="fas fa-book-open"></i>
+                    <h3>${unit.name}</h3>
+                    <p>${unit.description}</p>
+                    <div class="unit-meta">
+                        <span>${unit.questions.length} سؤال</span>
+                        <span>${localStorage.getItem(`unit_${unit.id}`) || '0'}% إكمال</span>
+                    </div>
+                `;
+                unitElement.onclick = () => selectUnit(unit);
+                unitsContainer.appendChild(unitElement);
+            });
+        }
+
+        function selectUnit(unit) {
+            if (currentUnit) {
+                Swal.fire({
+                    title: 'تأكيد',
+                    text: 'سيتم فقدان تقدمك الحالي، هل تريد الاستمرار؟',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم',
+                    cancelButtonText: 'لا',
+                    confirmButtonColor: '#4F46E5',
+                    cancelButtonColor: '#F87171'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        startUnit(unit);
+                    }
+                });
+            } else {
+                startUnit(unit);
+            }
+        }
+
+        function startUnit(unit) {
+            currentUnit = unit;
+            currentQuestionIndex = 0;
+            showQuestion();
+            updateProgress();
+        }
+
+        function showQuestion() {
+            const question = currentUnit.questions[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('optionsContainer').innerHTML = question.options
+                .map((option, index) => `
+                    <div class="option" onclick="handleAnswer(${index})">
+                        ${option}
+                    </div>
+                `).join('');
+            
+            updateProgress();
+            document.getElementById('questionContainer').style.display = 'block';
+            document.getElementById('explanation').innerHTML = '';
+        }
+
+        function handleAnswer(selectedIndex) {
+            const question = currentUnit.questions[currentQuestionIndex];
+            const isCorrect = selectedIndex === question.correct;
+            
+            Swal.fire({
+                title: isCorrect ? 'أحسنت!' : 'حاول مرة أخرى',
+                text: question.explanation,
+                icon: isCorrect ? 'success' : 'error',
+                confirmButtonText: 'التالي',
+                confirmButtonColor: '#4F46E5'
+            }).then(() => {
+                if (isCorrect) {
+                    updateProgress();
+                    nextQuestion();
+                }
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex + 1 < currentUnit.questions.length) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                finishUnit();
+            }
+        }
+
+        function finishUnit() {
+            Swal.fire({
+                title: 'تهانينا!',
+                text: 'لقد أكملت جميع أسئلة هذا الفصل بنجاح',
+                icon: 'success',
+                confirmButtonText: 'العودة للقائمة الرئيسية',
+                confirmButtonColor: '#4F46E5'
+            }).then(() => {
+                showUnits();
+            });
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const progress = ((currentQuestionIndex + 1) / currentUnit.questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            localStorage.setItem(`unit_${currentUnit.id}`, Math.round(progress));
+        }
+
+        function showUnits() {
+            if (currentQuestionIndex > 0) {
+                Swal.fire({
+                    title: 'تأكيد',
+                    text: 'هل تريد العودة للقائمة الرئيسية؟ سيتم فقدان تقدمك',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم',
+                    cancelButtonText: 'لا',
+                    confirmButtonColor: '#4F46E5',
+                    cancelButtonColor: '#F87171'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        resetAndShowUnits();
+                    }
+                });
+            } else {
+                resetAndShowUnits();
+            }
+        }
+
+        function resetAndShowUnits() {
+            document.getElementById('questionContainer').style.display = 'none';
+            currentUnit = null;
+            currentQuestionIndex = 0;
+            initializeUnits();
+        }
+
+        window.onload = initializeUnits;
+    </script>
+</body>
+</html>
